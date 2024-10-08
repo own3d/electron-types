@@ -2,20 +2,26 @@
 
 export {} // Make this a module
 
+// This allows TypeScript to pick our custom API
 declare global {
-    // This allows TypeScript to pick our custom API
-    namespace electron {
+    namespace versions {
         /**
-         * Authorization data structure (from the own3d.pro dashboard)
-         *
-         * @deprecated This will be replaced by the `magicLogin` flow
+         * The version of Node.js
          */
-        interface Authorization {
-            data: unknown
-            locale: string
-            token: string
-        }
+        function node(): string
 
+        /**
+         * The version of Chrome
+         */
+        function chrome(): string
+
+        /**
+         * The version of Electron
+         */
+        function electron(): string
+    }
+
+    namespace electron {
         /**
          * Display information structure
          */
@@ -204,9 +210,115 @@ declare global {
         }
 
         /**
+         * Returns the preload script path which can be used in the webview
+         *
+         * @example
+         * ```typescript
+         * webview.setAttribute('preload', `file://${await window.electron.preload()}`)
+         * ```
+         */
+        function preload(): Promise<void>
+
+        /**
+         * Check if the application needs to open the dev tools
+         */
+        function needsDevTools(): Promise<void>
+
+        /**
+         * Get the hostname of the own3d.pro dashboard (for the webview)
+         *
+         * @example
+         * ```typescript
+         * const hostname = await window.electron.getHostname()
+         * webview.setAttribute('src', `${hostname}/`)
+         * ```
+         */
+        function getHostname(): Promise<void>
+
+        /**
+         * Get the current settings of the application
+         */
+        function getSettings(): Promise<Settings>
+
+        /**
+         * Commit the settings to the file
+         *
+         * @param settings - The settings to commit
+         *
+         * @example
+         * ```typescript
+         * // get the current settings
+         * const settings = await getSettings();
+         *
+         * // partial update
+         * await commitSettings({launch_with_obs: !settings.launch_with_obs});
+         *
+         * // full update
+         * settings.launch_with_obs = !settings.launch_with_obs;
+         * await commitSettings(settings);
+         * ```
+         */
+        function commitSettings(settings: Settings): Promise<void>
+
+        /**
+         * Listen for changes to the settings
+         *
+         * @param callback - The callback to call when the settings change
+         */
+        function onSettingsChanged(callback: (settings: Settings) => void): void
+
+        /**
+         * Clear the cache of the application.
+         */
+        function clearCache(): Promise<void>
+
+        /**
+         * Toggle the overlay visibility state
+         */
+        function toggleOverlay(): Promise<void>
+
+        /**
+         * Toggle the overlay audio state
+         */
+        function toggleOverlayAudio(): Promise<void>
+
+        /**
+         * Get the list of verified games
+         */
+        function getGames(): Promise<Array<VerifiedGame>>
+
+        /**
+         * Listen for changes to the list of currently played games
+         *
+         * @param callback - The callback to call when the list of games change
+         */
+        function onGamesChanged(callback: (games: Array<VerifiedGame>) => void): void
+
+        /**
+         * Get the list of connected displays
+         */
+        function getDisplays(): Promise<Array<Display>>
+
+        /**
+         * Updates the display bounds for the overlay window based on user settings or default display settings
+         */
+        function requestDisplayUpdate(): Promise<void>
+
+        /**
          * API to interact with the desktop client (window management, authentication, etc.)
          */
         namespace desktop {
+            /**
+             * Authorization data structure (from the own3d.pro dashboard)
+             *
+             * @deprecated This will be replaced by the `magicLogin` flow
+             */
+            interface Authorization {
+                data: unknown
+                locale: string
+                token: string
+            }
+
             /**
              * Close the main window
              */
@@ -291,58 +403,6 @@ declare global {
                 progressCallback: (progress: InstallProgress) => void,
             ): Promise<Software>
         }
-
-        function getSettings(): Promise<Settings>
-
-        /**
-         * Commit the settings to the file
-         *
-         * @param settings - The settings to commit
-         *
-         * @example
-         * ```typescript
-         * // get the current settings
-         * const settings = await getSettings();
-         *
-         * // partial update
-         * await commitSettings({launch_with_obs: !settings.launch_with_obs});
-         *
-         * // full update
-         * settings.launch_with_obs = !settings.launch_with_obs;
-         * await commitSettings(settings);
-         * ```
-         */
-        function commitSettings(settings: Settings): Promise<void>
-
-        /**
-         * Clear the cache of the application.
-         */
-        function clearCache(): Promise<void>
-
-        /**
-         * Toggle the overlay visibility state
-         */
-        function toggleOverlay(): Promise<void>
-
-        /**
-         * Toggle the overlay audio state
-         */
-        function toggleOverlayAudio(): Promise<void>
-
-        /**
-         * Get the list of verified games
-         */
-        function getGames(): Promise<Array<VerifiedGame>>
-
-        /**
-         * Get the list of connected displays
-         */
-        function getDisplays(): Promise<Array<Display>>
-
-        /**
-         * Request an update of the display information
-         */
-        function requestDisplayUpdate(): Promise<void>
 
         /**
          * API (proxy) to interact with obs-websocket
