@@ -1,41 +1,85 @@
+// noinspection JSUnusedGlobalSymbols
+
 export {} // Make this a module
 
 declare global {
     // This allows TypeScript to pick our custom API
     namespace electron {
+        /**
+         * Authorization data structure (from the own3d.pro dashboard)
+         *
+         * @deprecated This will be replaced by the `magicLogin` flow
+         */
         interface Authorization {
             data: unknown
             locale: string
             token: string
         }
 
+        /**
+         * Display information structure
+         */
         interface Display {
+            /**
+             * The unique identifier of the display (for internal use)
+             */
             id: string
+
+            /**
+             * The name of the display (use this for identification and user-facing purposes)
+             */
             label: string
+
+            /**
+             * The bounds of the display (in pixels)
+             */
             bounds: {
                 x: number
                 y: number
                 width: number
                 height: number
             },
+
+            /**
+             * The work area of the display in DIP points.
+             */
             workArea: {
                 x: number
                 y: number
                 width: number
                 height: number
             },
+
+            /**
+             * The size of the display.
+             */
             size: {
                 width: number
                 height: number
             }
+
+            /**
+             * The work area size of the display (in pixels)
+             */
             workAreaSize: {
                 width: number
                 height: number
             }
+
+            /**
+             * The scale factor of the display
+             */
             scaleFactor: number
+
+            /**
+             * The rotation of the display (in degrees)
+             */
             rotation: number
         }
 
+        /**
+         * Oauth2 token structure (mostly via Authorization Code Grant with PKCE)
+         */
         interface Oauth2Token {
             token_type: string
             expires_in: number
@@ -44,6 +88,9 @@ declare global {
             expires_at: string
         }
 
+        /**
+         * The user object from the id.stream.tv API
+         */
         interface Own3dUser {
             id: string
             name: string
@@ -59,88 +106,102 @@ declare global {
             user: Own3dUser
         }
 
+        /**
+         * JSON schema for the `desktop.json` (settings) file
+         */
         interface Settings {
-            version?: string // version of the settings schema (diff will force a reset)
+            /**
+             * The version of the settings schema (diff will force a reset)
+             */
+            version?: string
+
+            /**
+             * The user credentials for the application
+             */
             credentials?: Own3dCredentials | null
+
+            /**
+             * Whether the application should launch with OBS
+             */
             launch_with_obs?: boolean
+
+            /**
+             * Whether the developer mode is enabled
+             */
             developer_mode?: boolean
+
+            /**
+             * Whether the overlay is disabled
+             */
             overlay_disabled?: boolean
+
+            /**
+             * Whether the overlay is muted
+             */
             overlay_muted?: boolean
+
+            /**
+             * Global hotkeys for the application
+             */
             hotkeys?: {
                 exit: string
             }
+
+            /**
+             * The display to use for the overlay
+             */
             display?: Display | null
+
+            /**
+             * The room identifier for the overlay
+             */
             room?: string | null
         }
 
+        /**
+         * Verified game structure (from the own3d.pro API)
+         */
         interface VerifiedGame {
+            /**
+             * The unique identifier of the game
+             */
             id: number
+
+            /**
+             * The name of the game
+             */
             name: string
+
+            /**
+             * The publisher of the game (if available)
+             */
             publisher: string | null
+
+            /**
+             * Additional setup notes for the game (if available)
+             */
             notes: string | null
+
+            /**
+             * Whether the game is supported by the overlay
+             */
             supported: boolean
+
+            /**
+             * Whether the game requires optimization (setting changes)
+             */
             requires_optimization: boolean
+
+            /**
+             * List of executable names for the game
+             */
             executables: Array<string>
+
+            /**
+             * The URL to the game's logo (if available)
+             */
             image_url: string | null
         }
-
-        type SoftwareName = 'obs-studio' | 'obs-own3d-desktop-connector';
-
-        interface Software {
-            installed: boolean;
-            name: SoftwareName;
-            paths?: {
-                binary: string;
-                plugins?: string;
-            };
-        }
-
-        interface InstallProgress {
-            status: 'downloading' | 'installing';
-            progress: number;
-            status_code?: number;
-        }
-
-        type RequestBatchOptions = {
-            /**
-             * The mode of execution obs-websocket will run the batch in
-             */
-            executionType?: RequestBatchExecutionType;
-            /**
-             * Whether obs-websocket should stop executing the batch if one request fails
-             */
-            haltOnFailure?: boolean;
-        };
-
-        enum RequestBatchExecutionType {
-            None = -1,
-            SerialRealtime = 0,
-            SerialFrame = 1,
-            Parallel = 2
-        }
-
-        type RequestBatchRequest<T = keyof unknown> = T extends keyof unknown ? unknown[T] extends never ? {
-            requestType: T;
-            requestId?: string;
-        } : {
-            requestType: T;
-            requestId?: string;
-            requestData: unknown[T];
-        } : never;
-
-        type ResponseMessage<T = keyof unknown> = T extends keyof unknown ? {
-            requestType: T;
-            requestId: string;
-            requestStatus: {
-                result: true;
-                code: number;
-            } | {
-                result: false;
-                code: number;
-                comment: string;
-            };
-            responseData: unknown[T];
-        } : never;
 
         /**
          * API to interact with the desktop client (window management, authentication, etc.)
@@ -190,6 +251,32 @@ declare global {
          * Beta API to interact with software packages
          */
         namespace software {
+            /**
+             * Name of the software package
+             */
+            type SoftwareName = 'obs-studio' | 'obs-own3d-desktop-connector';
+
+            /**
+             * Software package information
+             */
+            interface Software {
+                installed: boolean;
+                name: SoftwareName;
+                paths?: {
+                    binary: string;
+                    plugins?: string;
+                };
+            }
+
+            /**
+             * Installation progress information
+             */
+            interface InstallProgress {
+                status: 'downloading' | 'installing';
+                progress: number;
+                status_code?: number;
+            }
+
             /**
              * Get the status of a software package
              */
@@ -261,6 +348,59 @@ declare global {
          * API (proxy) to interact with obs-websocket
          */
         namespace obs {
+            /**
+             * obs-websocket request batch options
+             */
+            type RequestBatchOptions = {
+                /**
+                 * The mode of execution obs-websocket will run the batch in
+                 */
+                executionType?: RequestBatchExecutionType;
+                /**
+                 * Whether obs-websocket should stop executing the batch if one request fails
+                 */
+                haltOnFailure?: boolean;
+            };
+
+            /**
+             * obs-websocket request batch execution type
+             */
+            enum RequestBatchExecutionType {
+                None = -1,
+                SerialRealtime = 0,
+                SerialFrame = 1,
+                Parallel = 2
+            }
+
+            /**
+             * obs-websocket request batch request
+             */
+            type RequestBatchRequest<T = keyof unknown> = T extends keyof unknown ? unknown[T] extends never ? {
+                requestType: T;
+                requestId?: string;
+            } : {
+                requestType: T;
+                requestId?: string;
+                requestData: unknown[T];
+            } : never;
+
+            /**
+             * obs-websocket response message
+             */
+            type ResponseMessage<T = keyof unknown> = T extends keyof unknown ? {
+                requestType: T;
+                requestId: string;
+                requestStatus: {
+                    result: true;
+                    code: number;
+                } | {
+                    result: false;
+                    code: number;
+                    comment: string;
+                };
+                responseData: unknown[T];
+            } : never;
+
             /**
              * Check if the client is connected to obs-websocket
              */
