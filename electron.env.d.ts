@@ -355,8 +355,31 @@ declare global {
 
             /**
              * Tries to authenticate the user using the magic link flow
+             *
+             * Our desktop client will open the default browser with the magic link
+             * and wait for the user to authenticate. Once the user is authenticated,
+             * the browser will redirect to the desktop client with the access token.
+             *
+             * In case of a Timeout, the user shall be informed that they may need
+             * to try again. Avoid re-calling this function automatically.
+             *
+             * @returns The access token from the magic link flow
+             *
+             * @throws Error If the URL is not authorized within 2 minutes (timeout)
+             *
+             * @example
+             * ```
+             * const {access_token} = await window.electron.desktop.magicLogin();
+             * ```
              */
             function magicLogin(): Promise<{ access_token: string }>
+
+            /**
+             * Log the user out of the application
+             *
+             * This function behaves like `clearCache()` but also logs the user out
+             */
+            function logout(): void
         }
 
         /**
