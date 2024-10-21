@@ -335,6 +335,11 @@ declare global {
             function maximizeWindow(): void
 
             /**
+             * Check if the main window is maximized
+             */
+            function isMaximized(): Promise<boolean>
+
+            /**
              * Quit the entire application
              */
             function quit(): void
@@ -548,6 +553,20 @@ declare global {
              * ```
              */
             function callBatch(requests: RequestBatchRequest[], options?: RequestBatchOptions): Promise<ResponseMessage[]>
+
+            /**
+             * Enable the obs-websocket server on the local machine.
+             *
+             * @throws Error If obs-websocket could not be enabled
+             */
+            function enableWebSocketServer(options?: object): Promise<void>
+
+            /**
+             * Check if the obs-websocket server is enabled on the local machine.
+             *
+             * @throws Error If obs-websocket is not installed
+             */
+            function isWebSocketServerEnabled(): Promise<boolean>
 
             /**
              * Register an event listener for obs-websocket events.
