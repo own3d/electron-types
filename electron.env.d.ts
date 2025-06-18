@@ -318,6 +318,26 @@ declare global {
                 locale: string
                 token: string
             }
+            
+            interface OpenDialogReturnValue {
+                /**
+                 * whether or not the dialog was canceled.
+                 */
+                canceled: boolean;
+                /**
+                 * An array of file paths chosen by the user. If the dialog is cancelled this will
+                 * be an empty array.
+                 */
+                filePaths: string[];
+                /**
+                 * An array matching the `filePaths` array of base64 encoded strings which contains
+                 * security scoped bookmark data. `securityScopedBookmarks` must be enabled for
+                 * this to be populated. (For return values, see table here.)
+                 *
+                 * @platform darwin,mas
+                 */
+                bookmarks?: string[];
+            }
 
             /**
              * Close the main window
@@ -385,6 +405,15 @@ declare global {
              * This function behaves like `clearCache()` but also logs the user out
              */
             function logout(): void
+
+            /**
+             * Opens a system native file dialog
+             * 
+             * This function proxies the showOpenDialog function from electron
+             * 
+             * @param options An optional object with options for showOpenDialog
+             */
+            function openFileDialog(options: any): Promise<OpenDialogReturnValue>
         }
 
         /**
@@ -493,6 +522,15 @@ declare global {
              * Check if the client is connected to obs-websocket
              */
             function connected(): Promise<boolean>
+
+            /**
+             * Tries to detect and store OBS websocket credentials from well known paths
+             * 
+             * Optionally looks in config paths of a portable OBS Studio installation
+             * 
+             * @param pathToBinary An path to a portable OBS Studio binary (e.g. obs64.exe)
+             */
+            function findAndStoreCredentials(pathToBinary?: string): Promise<boolean>
 
             /**
              * Connects to obs-websocket server.
